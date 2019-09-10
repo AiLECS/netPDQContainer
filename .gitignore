@@ -1,0 +1,8 @@
+bin/
+obj/
+/packages/
+/hashes
+!/hashes/cem.PDQ
+!/hashes/ignorable.PDQ
+!/hashes/porn.PDQ
+!/hashes/madeup.PDQ
