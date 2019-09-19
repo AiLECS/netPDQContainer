@@ -2,7 +2,11 @@ bin/
 obj/
 /packages/
 /hashes
-!/hashes/cem.PDQ
-!/hashes/ignorable.PDQ
-!/hashes/porn.PDQ
-!/hashes/madeup.PDQ
+!/hashes/sample.PDQ
+.idea/.idea.netPDQContainer/.idea/.gitignore
+.idea/.idea.netPDQContainer/.idea/contentModel.xml
+.idea/.idea.netPDQContainer/.idea/indexLayout.xml
+.idea/.idea.netPDQContainer/.idea/modules.xml
+.idea/.idea.netPDQContainer/.idea/projectSettingsUpdater.xml
+.idea/.idea.netPDQContainer/.idea/vcs.xml
+.idea/.idea.netPDQContainer/riderModule.iml

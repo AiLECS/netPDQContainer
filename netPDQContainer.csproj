@@ -6,13 +6,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.14.3" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
-        <PackageReference Include="netMIH" Version="0.1.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="hashes" />
+        <PackageReference Include="netMIH" Version="0.2.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,10 +19,13 @@
       <None Update="hashes\ignorable.PDQ">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="hashes\madeup.PDQ">
+      <None Update="hashes\porn.PDQ">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="hashes\porn.PDQ">
+      <None Update="hashes\random_10000000.PDQ">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="hashes\random_100000000.PDQ">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
