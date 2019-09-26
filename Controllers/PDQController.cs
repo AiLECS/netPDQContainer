@@ -64,7 +64,7 @@ namespace netPDQContainer.Controllers
             Summary = "Hash an image",
             Description = "Generate the PDQ hash for an image (i.e. picture). Reducing image size to 512px (long end, maintain aspect ratio) will reduce network overhead without reducing accuracy ")]
         [SwaggerResponse(StatusCodes.Status200OK, "PDQ hash and quality metric for image", typeof(PDQHashCalculation))]
-        public async Task<ActionResult<PDQHashCalculation>> GetHash([FromBody, SwaggerParameter("File for upload (named in form as \"file\"", Required = true)] IFormFile file)
+        public async Task<ActionResult<PDQHashCalculation>> GetHash([FromForm, SwaggerParameter("File for upload (named in form as \"file\"", Required = true)] IFormFile file)
         {
             var tempFile = Path.GetTempFileName();
             try
