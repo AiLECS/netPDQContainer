@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>netMIH</name>
+    </assembly>
+    <members>
+        <member name="T:netMIH.Index">
+            <summary>
+            MIH Index object. Utilises mulitple-index hashing as per https://www.cs.toronto.edu/~norouzi/research/papers/multi_index_hashing.pdf 
+            </summary>
+        </member>
+        <member name="F:netMIH.Index._categories">
+            <summary>
+            All unique categories referenced by loaded hashes
+            </summary>
+        </member>
+        <member name="F:netMIH.Index._items">
+            <summary>
+            All hashes (saved as BitArray objects), mapped against array of respective categories' offset in <see cref="F:netMIH.Index._categories"/>
+            </summary>
+        </member>
+        <member name="F:netMIH.Index._index">
+            <summary>
+            MIH index. Consists of an array (length = HashSize/WordLength) containing Dictionary of each substring of hash mapped to hash offset in <see cref="F:netMIH.Index._items"/>
+            </summary>
+        </member>
+        <member name="F:netMIH.Index._trainingData">
+            <summary>
+            Training data - Dictionary of hashes, mapped against offset of category in <see cref="F:netMIH.Index._categories"/>. Cleared upon training of data (i.e. building of index) 
+            </summary>
+        </member>
+        <member name="P:netMIH.Index.Trained">
+            <summary>
+            Is the index trained (i.e. read-only) and queryable
+            </summary>
+        </member>
+        <member name="P:netMIH.Index.Regex">
+            <summary>
+            Regex for testing passed hashes for consistency with (a) format (hex) and (b) hashsize
+            </summary>
+            <remarks>Ignores case, but hashes are stored as lower case</remarks>
+        </member>
+        <member name="P:netMIH.Index.HashSize">
+            <summary>
+            Size of indexed hash in bits (e.g. 256 for PDQ)
+            </summary>
+        </member>
+        <member name="P:netMIH.Index.WordLength">
+            <summary>
+            Length of each word mapped as part of MIH process. 
+            </summary>
+        </member>
+        <member name="P:netMIH.Index.MatchThreshold">
+            <summary>
+            Match threshold for use within indexing. Queries exceeding this threshold revert to linear lookups
+            </summary>
+        </member>
+        <member name="P:netMIH.Index.WindowSize">
+            <summary>
+            Max hamming distance to calculate window (i.e. permutations) for.
+            </summary>
+        </member>
+        <member name="T:netMIH.Index.Configuration">
+            <summary>
+            Supported configurations for known algorithms
+            </summary>
+        </member>
+        <member name="F:netMIH.Index.Configuration.PDQ">
+            <summary>
+            PDQ algorithm
+            </summary>
+            <remarks>see https://github.com/facebook/ThreatExchange/blob/master/hashing/hashing.pdf</remarks>
+        </member>
+        <member name="M:netMIH.Index.#ctor(netMIH.Index.Configuration)">
+            <summary>
+            Convenience method/constructor. Accepts configuration for known algorithms (currently PDQ).
+            </summary>
+            <param name="config">Configuration. Currently only PDQ supported</param>
+            <exception cref="T:System.ArgumentException">Unknown/unsupported configuration requested.</exception>
+        </member>
+        <member name="M:netMIH.Index.#ctor(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Manual constructor. Recommended only if you know what you're doing!
+            </summary>
+            <param name="hashSize">Hash size in bits</param>
+            <param name="wordLength">Word length (in bits)</param>
+            <param name="matchThreshold">Supported 'match' threshold (i.e. hamming distance)</param>
+            <exception cref="T:System.ArgumentException">Thrown if invalid combination of arguments submitted</exception>
+        </member>
+        <member name="M:netMIH.Index.Count">
+            <summary>
+            Return the number of items within the collection. Returns 0 if NOT trained
+            </summary>
+            <returns>If trained, number of hashes indexed. Else, 0. </returns>
+        </member>
+        <member name="M:netMIH.Index.Update(System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Add entries to index.
+            </summary>
+            <param name="items">Enumerable collection of hex strings (each with length <see cref="P:netMIH.Index.HashSize"/>/4)</param>
+            <param name="category">Category to map against this collection of hashes</param>
+            <exception cref="T:System.NotSupportedException">Index already trained and therefore read-only</exception>
+            <exception cref="T:System.ArgumentException">Invalid hash received.</exception>
+            <remarks> Hashes are stored and returned in lower case. Theoretically, categories could be replaced with unique identifiers for each PDQ (e.g. pointing to a DB reference).
+            This has not been tested, though, so proceed with caution!</remarks>
+        </member>
+        <member name="M:netMIH.Index.Train">
+            <summary>
+            Train this index (makes it read-only)
+            </summary>
+            <remarks>This can be a slow process! We've implemented parallel looping for part of the training,
+            but there remains a brief, large memory overhead.</remarks>
+            <returns>Number unique hashes within index</returns>
+        </member>
+        <member name="M:netMIH.Index.ToHex(System.Collections.BitArray)">
+            <summary>
+            Convert provided BitArray to hex string
+            </summary>
+            <param name="bits">Hash as BitArray</param>
+            <returns>hex string representing BitArray value</returns>
+            <remarks>Converter based on solution found at <see href="https://stackoverflow.com/questions/37162727/c-sharp-bitarray-to-hex"/></remarks>
+        </member>
+        <member name="M:netMIH.Index.FromHex(System.String)">
+            <summary>
+            Convert hex string to BitArray representation
+            </summary>
+            <param name="hexData">hex formatted string (4 bits per char)</param>
+            <example>
+            <code>
+            var bits = BitArray("358c86641a5269ab5b0db5f1b2315c1642cef9652c39b6ced9f646d91f071927");
+            </code></example>
+            <returns>BitArray representation of hex string</returns>
+            <remarks>Based on converter located at <see href="https://stackoverflow.com/questions/4269737/function-convert-hex-string-to-bitarray-c-sharp"/> </remarks>
+        </member>
+        <member name="M:netMIH.Index.Query(System.String,System.Int32)">
+            <summary>
+            Query against this index. Uses MIH if maxDistance set lower than or equal to <see cref="P:netMIH.Index.MatchThreshold"/>
+            </summary>
+            <param name="hash">Hash for lookup, as hex string</param>
+            <param name="maxDistance">Max hamming distance for similarity lookup (0 = identical). NOTE: linear search conducted if higher than <see cref="P:netMIH.Index.MatchThreshold"/></param>
+            <returns>Enumerable to <see cref="T:netMIH.Result"/> objects.</returns>
+            <exception cref="T:System.NotSupportedException">Index not trained</exception>
+        </member>
+        <member name="M:netMIH.Index.ListCategories(System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            List categories within index
+            </summary>
+            <param name="filter">Optional - return  only categories residing at provided indices</param>
+            <returns>Enumerable of categories within index</returns>
+            <exception cref="T:System.IndexOutOfRangeException">Offset provided in filter is not available within _categories.</exception>
+        </member>
+        <member name="M:netMIH.Index.GetHamming(System.Collections.BitArray,System.Collections.BitArray,System.Int32)">
+            <summary>
+            Calculates hamming distance between two identical length BitArrays. 
+            </summary>
+            <param name="hash1">first hash for comparison</param>
+            <param name="hash2">second hash for comparison</param>
+            <param name="maxDistance">Optional - max hamming distance. Stop comparing if this figure is reached. </param>
+            <returns>Hamming distance or -1 if max hamming distance provided and exceeded.</returns>
+            <exception cref="T:System.ArgumentException">Thrown if two BitArrays are not of equal length</exception>
+        </member>
+        <member name="M:netMIH.Index.GetWindow(System.Collections.BitArray,System.Int32,System.Int32,System.Collections.Generic.HashSet{System.String})">
+            <summary>
+            Returns all permutations of provided word (bitarray) within hamming distance.
+            </summary>
+            <param name="word">Candidate word (as BitArray)</param>
+            <param name="distance">Maximum hamming distance (inclusive)</param>
+            <param name="position">Optional. Should not be provided by end user (used only in recursive calls)</param>
+            <param name="entries">Optional. Should not be provided by end user (used only within recursive calls)</param>
+            <returns>Enumerable of strings within provided hamming distance from provided word</returns>
+        </member>
+        <member name="T:netMIH.Result">
+            <summary>
+            Index query result.
+            </summary>
+            <remarks>Use of category could theoretically be replaced by a unique identifier for candidate file (ie pointer to a dt</remarks>
+        </member>
+        <member name="P:netMIH.Result.Hash">
+            <summary>
+            Value of matching record
+            </summary>
+            <remarks>Example provided is for PDQ hash (64 character hex string)</remarks>
+            <example>358c86641a5269ab5b0db5f1b2315c1642cef9652c39b6ced9f646d91f071927</example>
+        </member>
+        <member name="P:netMIH.Result.Distance">
+            <summary>
+            Hamming (i.e. edit) distance between subject hash and returned (this) hash. 
+            </summary>
+            <remarks>Can be used by client for sorting</remarks>
+            <example>2</example>
+        </member>
+        <member name="P:netMIH.Result.Categories">
+            <summary>
+            Categories recorded against hash
+            </summary>
+            <example>["Ignorable"]</example>
+        </member>
+    </members>
+</doc>

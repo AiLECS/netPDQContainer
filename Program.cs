@@ -7,7 +7,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
+#pragma warning disable 1591
 namespace netPDQContainer
 {
     public class Program
@@ -16,7 +16,7 @@ namespace netPDQContainer
         {
             CreateWebHostBuilder(args).Build().Run();
         }
-
+    
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
@@ -29,3 +29,4 @@ namespace netPDQContainer
 
     }
 }
+#pragma warning restore 1591

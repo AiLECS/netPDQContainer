@@ -1,5 +1,12 @@
 {
   "PDQ": {
     "Binary": "/facebook/hashing/pdq/cpp/pdq-photo-hasher"
+  },
+  "HashService": {
+    "Workers": 4
+},
+  "SearchService": {
+    "Workers": 5
   }
+ 
 }

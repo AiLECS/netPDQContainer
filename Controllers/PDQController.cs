@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Rewrite.Internal;
 using netMIH;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -23,17 +21,20 @@ namespace netPDQContainer.Controllers
     {
         private readonly netMIH.Index _index;
         private readonly PDQWrapper _wrapper;
-
+        
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="index">netMIH index (provided via dependency injection</param>
+        /// <param name="wrapper">PDQWrapper (provided via dependency injection</param>
         public PDQController(netMIH.Index index, PDQWrapper wrapper)
         {
             this._index = index;
             this._wrapper = wrapper;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>List</returns>
+        
+        //ignore lack of XML comments here - swagger annotations will populate all relevant documentation.
+        #pragma warning disable 1591
         [HttpGet]
         [SwaggerOperation(
             Summary = "List categories",
@@ -44,7 +45,7 @@ namespace netPDQContainer.Controllers
         {
             return _index.ListCategories().ToArray();
         }
-        
+
         [HttpGet]
         [SwaggerOperation(
             Summary = "Query PDQ hash",
@@ -87,7 +88,7 @@ namespace netPDQContainer.Controllers
                 }
             }
             
-            
+        #pragma warning restore 1591   
         }
 
     }

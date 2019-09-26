@@ -35,7 +35,7 @@ namespace netPDQContainer.collections
 
 
     /// <summary>
-    /// Queue for concurrent use, suitable for use on servers. taken from <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-2.1"/> 
+    /// Queue for concurrent use, suitable for use on servers. taken from <seealso uref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-2.1"/> 
     /// </summary>
     public class BackgroundQueue<T> : IBackgroundTaskQueue<T>
     {

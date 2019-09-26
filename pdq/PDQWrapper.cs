@@ -7,6 +7,9 @@ using System.Text;
 
 namespace netPDQContainer
 {
+    /// <summary>
+    /// Wrapper class for PDQ hash provider.
+    /// </summary>
     public class PDQWrapper
     {
         private readonly string _pdqExecutable;
@@ -38,7 +41,7 @@ namespace netPDQContainer
         /// Calculate PDQhash for given file path.
         /// </summary>
         /// <param name="path">Absolute/relative path of file for hashing</param>
-        /// <returns><cref="PDQHashCalculation"/> for provided image file</returns>
+        /// <returns><see cref="PDQHashCalculation"/> for provided image file</returns>
         /// <exception cref="Exception">PDQ hash attempt failed. Returns stderr output as part of exception thrown.</exception>
         /// TODO: Integrate support for image resizing prior to passing to executable
         public PDQHashCalculation GetHash(string path)

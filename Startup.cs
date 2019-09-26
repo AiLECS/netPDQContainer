@@ -9,6 +9,7 @@ using netPDQContainer.collections;
 using netPDQContainer.hubs;
 using netPDQContainer.services;
 using Swashbuckle.AspNetCore.Swagger;
+#pragma warning disable 1591
 
 namespace netPDQContainer
 {
@@ -42,8 +43,11 @@ namespace netPDQContainer
             Console.WriteLine($"Index reports {i.Count()} unique entries");
             services.AddSingleton<netMIH.Index>(i);
             
+            
+            services.Configure<HashServiceOptions>(Configuration.GetSection("HashService"));
             services.AddSingleton<IBackgroundTaskQueue<Tuple<byte[], string, string>>, BackgroundQueue<Tuple<byte[], string, string>>>();
             services.AddHostedService<HashService>();
+            services.Configure<SearchServiceOptions>(Configuration.GetSection("SearchService"));
             services.AddSingleton<IBackgroundTaskQueue<Tuple<string, int, string>>, BackgroundQueue<Tuple<string, int, string>>>();
             services.AddHostedService<SearchService>();
 
@@ -82,11 +86,6 @@ namespace netPDQContainer
             });
         }
 
-        /// <summary>
-        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        /// </summary>
-        /// <param name="app">-</param>
-        /// <param name="env">-</param>
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -117,3 +116,4 @@ namespace netPDQContainer
         }
     }
 }
+#pragma warning restore 1591

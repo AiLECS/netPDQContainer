@@ -5,35 +5,50 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
-using netMIH;
+using Microsoft.Extensions.Options;
 using netPDQContainer.collections;
 using netPDQContainer.hubs;
 
 namespace netPDQContainer.services
 {
+    /// <summary>
+    /// Search/lookup service. Background worker for SearchHub PDQ search requests.
+    /// </summary>
     public class SearchService:BackgroundService
     {
         private readonly IBackgroundTaskQueue<Tuple<string, int, string>> _labelFindQueue;
         private readonly netMIH.Index _index;
         private readonly IHubContext<SearchHub> _hubContext;
-        public SearchService(IBackgroundTaskQueue<Tuple<string, int, string>> labelFindQueue, netMIH.Index index, IHubContext<SearchHub> hubContext)
+        private readonly IOptions<SearchServiceOptions> _options;
+        
+        /// <summary>
+        /// Default constructor. All parameters populated via dependency injection
+        /// </summary>
+        /// <param name="labelFindQueue">Search request queue. See <see cref="SearchHub"/> for further information.</param>
+        /// <param name="index">netMIH index for lookups</param>
+        /// <param name="hubContext">SearchHub context for sending responses/results.</param>
+        /// <param name="options">Configurable options</param>
+        public SearchService(IBackgroundTaskQueue<Tuple<string, int, string>> labelFindQueue, netMIH.Index index, IHubContext<SearchHub> hubContext, IOptions<SearchServiceOptions> options)
         {
             _labelFindQueue = labelFindQueue;
             _index = index;
             _hubContext = hubContext;
+            _options = options;
         }
 
-
+        /// <summary>
+        /// Service thread. Managed by stack, initiated at creation.
+        /// </summary>
+        /// <param name="stoppingToken">Cancellation token</param>
+        /// <returns>async task.</returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var cts = new CancellationTokenSource();
-            
-            //arbitrary number. Should put in config
-            var workerCount = 3;
+           
             var tasks = new List<Task>();
             while (!stoppingToken.IsCancellationRequested)
             {
-                while (tasks.Count < workerCount)
+                while (tasks.Count < _options.Value.Workers)
                 {
                     tasks.Add(RunWorker(cts.Token));
                 }
@@ -45,7 +60,12 @@ namespace netPDQContainer.services
             
             
         }
-
+        
+        /// <summary>
+        /// Run worker for processing requests. Conduct searches and return results to clients.
+        /// </summary>
+        /// <param name="ct">Cancellation token.</param>
+        /// <returns>async task</returns>
         private async Task RunWorker(CancellationToken ct)
         {
             while (!ct.IsCancellationRequested)
