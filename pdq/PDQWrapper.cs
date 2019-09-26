@@ -1,19 +1,21 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
-using Remotion.Linq.Parsing.ExpressionVisitors.Transformation.PredefinedTransformations;
-
 
 namespace netPDQContainer
 {
     public class PDQWrapper
     {
-        private string _pdqExecutable;
-
+        private readonly string _pdqExecutable;
+        
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="pdqExecutable">Path (absolute or relative) of PDQ hash executable.</param>
+        /// <exception cref="FileNotFoundException">PDQ hash executable not found.</exception>
         public PDQWrapper(string pdqExecutable)
         {
             if (!File.Exists(pdqExecutable))
@@ -33,16 +35,17 @@ namespace netPDQContainer
             _pdqExecutable = pdqExecutable;
         }
         /// <summary>
-        /// 
+        /// Calculate PDQhash for given file path.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">Absolute/relative path of file for hashing</param>
+        /// <returns><cref="PDQHashCalculation"/> for provided image file</returns>
+        /// <exception cref="Exception">PDQ hash attempt failed. Returns stderr output as part of exception thrown.</exception>
         /// TODO: Integrate support for image resizing prior to passing to executable
         public PDQHashCalculation GetHash(string path)
         {
-            var errorData = "";
             using (var p = new Process())
             {
+                var errorData = "";
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.CreateNoWindow = true;
                 p.StartInfo.FileName = _pdqExecutable;
@@ -63,5 +66,5 @@ namespace netPDQContainer
             }
             
         }
-}
+    }
 }

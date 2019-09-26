@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite.Internal;
 using netMIH;
+using Swashbuckle.AspNetCore.Annotations;
 
 
 namespace netPDQContainer.Controllers
@@ -26,37 +29,41 @@ namespace netPDQContainer.Controllers
             this._index = index;
             this._wrapper = wrapper;
         }
+
         /// <summary>
-        /// Get a list of available categories
+        /// 
         /// </summary>
-        /// <returns><Array of category names within system/> /returns>
+        /// <returns>List</returns>
         [HttpGet]
+        [SwaggerOperation(
+            Summary = "List categories",
+            Description = "Return a list of categories within index")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Request OK", typeof(string[]))]
         [Route("categories")]
         public ActionResult<IEnumerable<string>> Get()
         {
             return _index.ListCategories().ToArray();
         }
         
-        /// <summary>
-        /// Query PDQ hash
-        /// </summary>
-        /// <param name="hash"></param>
-        /// <param name="maxhd">Maximum hamming distance for match. Defaults to 32.</param>
-        /// <returns>Array of <see cref="netMIH.Result"/> objects within query distance</returns>
         [HttpGet]
-        public ActionResult<IEnumerable<Result>> Get([FromQuery, Required, RegularExpression("^[a-f0-9]{64}$")] string hash, [FromQuery] int maxhd = 32)
+        [SwaggerOperation(
+            Summary = "Query PDQ hash",
+            Description = "Query index for PDQ hashes within match window")]
+        [SwaggerResponse(StatusCodes.Status200OK, "PDQ generated", typeof(IEnumerable<Result>))]
+        public ActionResult<IEnumerable<Result>> Get([FromQuery, Required, 
+                                                      RegularExpression("^[A-Fa-f0-9]{64}$" ), 
+                                                      SwaggerParameter("Candidate PDQ hash - anticipates 64 character hex string. e.g. dfa38c60505ed2bacb06b60b8fe7aed0015B5dea5aef9105aca354Cfda5ffe36")] string hash, 
+            [FromQuery, SwaggerParameter("Maximum Hamming (i.e. edit) Distance. e.g. 32", Required = false)] int maxhd = 32)
         {
-            return new OkObjectResult(_index.Query(hash, maxhd));
+            return new OkObjectResult(_index.Query(hash.ToLower(), maxhd));
         }
 
-        /// <summary>
-        /// Hash a file
-        /// </summary>
-        /// <param name="file">Image file for hashing</param>
-        /// <returns><see cref= "netMIH.PDQHashCalculation"/> for provided file</returns>
-        /// <exception cref="Exception"></exception>
         [HttpPost]
-        public async Task<ActionResult<PDQHashCalculation>> GetHash(IFormFile file)
+        [SwaggerOperation(
+            Summary = "Hash an image",
+            Description = "Generate the PDQ hash for an image (i.e. picture). Reducing image size to 512px (long end, maintain aspect ratio) will reduce network overhead without reducing accuracy ")]
+        [SwaggerResponse(StatusCodes.Status200OK, "PDQ hash and quality metric for image", typeof(PDQHashCalculation))]
+        public async Task<ActionResult<PDQHashCalculation>> GetHash([FromBody, SwaggerParameter("File for upload (named in form as \"file\"", Required = true)] IFormFile file)
         {
             var tempFile = Path.GetTempFileName();
             try

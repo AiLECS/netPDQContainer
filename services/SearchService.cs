@@ -39,7 +39,7 @@ namespace netPDQContainer.services
                 }
                 
                 tasks.RemoveAll(x => x.Status != TaskStatus.Running);
-                await Task.Delay(100);
+                await Task.Delay(100, stoppingToken);
             }
             cts.Cancel();
             
@@ -57,7 +57,7 @@ namespace netPDQContainer.services
                     {
                         await _hubContext.Clients.Client(tasking.Item3).SendAsync("Results", new SearchResult(){Hash = tasking.Item1, Results = _index.Query(tasking.Item1, tasking.Item2).ToArray()}, ct);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         //connection probably lost - need to add some proper catching here
                     }
